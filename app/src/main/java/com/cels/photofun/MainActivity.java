@@ -24,6 +24,11 @@ import java.io.InputStream;
 public class MainActivity extends AppCompatActivity {
     private static final int PICK_IMAGE = 2;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
+
+    static {
+        System.loadLibrary("startJNI");
+    }
+
     private Bitmap imageBitmap;
     private SeekBar seekBar;
 
@@ -84,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         super.onCreate(savedInstanceState);
         start();
+        Toast.makeText(getApplicationContext(), startNDI(), Toast.LENGTH_LONG).show();
+
 
 
     }
@@ -165,5 +172,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    public native String startNDI();
 }
