@@ -1,8 +1,10 @@
 package com.cels.photofun;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,16 +22,27 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
-    Bitmap imageBitmap;
-    SeekBar seekBar;
+    private static final int PICK_IMAGE = 2;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private Bitmap imageBitmap;
+    private SeekBar seekBar;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         setContentView(R.layout.activity_main);
-        super.onCreate(savedInstanceState);
+        Toast.makeText(getApplicationContext(), "I rotated", Toast.LENGTH_LONG).show();
+        start();
+    }
+
+    private void start() {
         seekBar = (SeekBar) findViewById(R.id.seekBar2);
-        Toast.makeText(getApplicationContext(), "I work", Toast.LENGTH_LONG).show();
+
         getWindow().setFormat(PixelFormat.RGBA_8888);
+        if (imageBitmap != null) {
+            ImageView photoImg = (ImageView) findViewById(R.id.imageView);
+            photoImg.setImageBitmap(imageBitmap);
+        }
         Button photo = (Button) findViewById(R.id.buttonTakePic);
         photo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
                     ImageView photo = (ImageView) findViewById(R.id.imageView);
                     KMeans kMeans = new KMeans(imageBitmap, seekBar.getProgress() + 1);
                     Toast.makeText(getApplicationContext(), "" + (seekBar.getProgress() + 1), Toast.LENGTH_LONG).show();
-                    photo.setImageBitmap(kMeans.getResult());
+                    imageBitmap = kMeans.getResult();
+                    photo.setImageBitmap(imageBitmap);
                 } else {
                     Toast.makeText(getApplicationContext(), "Please choose the image", Toast.LENGTH_LONG).show();
                 }
@@ -63,12 +77,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
             }
         });
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState);
+        start();
 
 
     }
-
-    private static final int PICK_IMAGE = 2;
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private void dispatchTakePictureIntent() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -90,8 +108,9 @@ public class MainActivity extends AppCompatActivity {
             try {
                 imageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
                 if (photoImg.getWidth() > 0 && photoImg.getHeight() > 0) {
-                    imageBitmap = Bitmap.createScaledBitmap(imageBitmap, photoImg.getWidth(), photoImg.getHeight(), false);
-                    photoImg.setImageBitmap(imageBitmap);
+                    // imageBitmap = Bitmap.createScaledBitmap(imageBitmap, photoImg.getWidth(), photoImg.getHeight(), false);
+                    // photoImg.setImageBitmap(imageBitmap);
+                    addImage();
                 } else {
                     Toast.makeText(getApplicationContext(), "Please try again, but don't turn the screen.", Toast.LENGTH_LONG).show();
                 }
@@ -102,18 +121,49 @@ public class MainActivity extends AppCompatActivity {
 
         } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
             try {
-                ImageView photoImg = (ImageView) findViewById(R.id.imageView);
+                //ImageView photoImg = (ImageView) findViewById(R.id.imageView);
                 InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(data.getData());
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
 
                 imageBitmap = BitmapFactory.decodeStream(inputStream);
-                imageBitmap = Bitmap.createScaledBitmap(imageBitmap, photoImg.getWidth(), photoImg.getHeight(), false);
-                photoImg.setImageBitmap(imageBitmap);
+                addImage();
+                // imageBitmap = Bitmap.createScaledBitmap(imageBitmap, photoImg.getWidth(), photoImg.getHeight(), false);
+                // photoImg.setImageBitmap(imageBitmap);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }
     }
+
+    private void addImage() {
+        if (imageBitmap == null) return;
+        ImageView photoImg = (ImageView) findViewById(R.id.imageView);
+        int coefWidth = imageBitmap.getWidth() / photoImg.getWidth();
+        int coefHeight = imageBitmap.getHeight() / photoImg.getHeight();
+        int coefScale = Math.min(coefWidth, coefHeight);
+
+        imageBitmap = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth() / coefScale, imageBitmap.getHeight() / coefScale, false);
+        photoImg.setImageBitmap(imageBitmap);
+        photoImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                imageRotate();
+            }
+        });
+    }
+
+    private void imageRotate() {
+        if (imageBitmap == null) return;
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), matrix, true);
+        ImageView photoImg = (ImageView) findViewById(R.id.imageView);
+        photoImg.setImageBitmap(imageBitmap);
+
+
+    }
+
 
 }
