@@ -29,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("startJNI");
     }
 
+    static {
+        System.loadLibrary("buildSegmented");
+    }
+
     private Bitmap imageBitmap;
     private SeekBar seekBar;
 
@@ -60,11 +64,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (imageBitmap != null) {
+                    buildSegmented(imageBitmap);
                     ImageView photo = (ImageView) findViewById(R.id.imageView);
-                    KMeans kMeans = new KMeans(imageBitmap, seekBar.getProgress() + 1);
+                    //imageBitmap
+                    /*KMeans kMeans = new KMeans(imageBitmap, seekBar.getProgress() + 1);
                     Toast.makeText(getApplicationContext(), "" + (seekBar.getProgress() + 1), Toast.LENGTH_LONG).show();
-                    imageBitmap = kMeans.getResult();
+                    imageBitmap = kMeans.getResult();*/
                     photo.setImageBitmap(imageBitmap);
+                    Toast.makeText(getApplicationContext(), "Successful segmentation", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getApplicationContext(), "Please choose the image", Toast.LENGTH_LONG).show();
                 }
@@ -89,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         super.onCreate(savedInstanceState);
         start();
-        Toast.makeText(getApplicationContext(), startNDI(), Toast.LENGTH_LONG).show();
+        //  Toast.makeText(getApplicationContext(), startNDI(), Toast.LENGTH_LONG).show();
 
 
 
@@ -172,5 +179,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public native String startNDI();
+    public native Bitmap buildSegmented(Bitmap bitmap);
+   /* public native String startNDI();
+    static{
+        System.loadLibrary("startNDI");
+    }*/
+
 }

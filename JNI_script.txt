@@ -1,0 +1,1 @@
+C:\jdk1.8.0_101\bin\javah -d jni -classpath  C:\Users\Sasha\AppData\Local\Android\Sdk\platforms\android-24\Android.jar;C:\Users\Sasha\AppData\Local\Android\Sdk\extras\android\m2repository\com\android\support\appcompat-v7\25.0.0\appcompat-v7-25.0.0-sources.jar;D:\java\PhotoFun\app\build\intermediates\classes\debug com.cels.photofun.MainActivity
