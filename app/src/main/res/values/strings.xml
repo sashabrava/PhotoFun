@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Photo Fun</string>
+    <string name="segment">Segment</string>
+    <string name="segment_process">Segmenting…</string>
+    <string name="take_pic">Take pic</string>
+    <string name="load_pic">Load pic</string>
+    <string name="save">Save</string>
 </resources>
