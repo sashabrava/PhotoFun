@@ -25,9 +25,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int PICK_IMAGE = 2;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
 
-    static {
+   /* static {
         System.loadLibrary("startJNI");
-    }
+    }*/
 
     static {
         System.loadLibrary("buildSegmented");
@@ -64,13 +64,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (imageBitmap != null) {
-                    buildSegmented(imageBitmap);
+                    Bitmap imageForC = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth(), imageBitmap.getHeight(), false);
+                    buildSegmented(imageForC, seekBar.getProgress() + 1);
                     ImageView photo = (ImageView) findViewById(R.id.imageView);
                     //imageBitmap
                     /*KMeans kMeans = new KMeans(imageBitmap, seekBar.getProgress() + 1);
                     Toast.makeText(getApplicationContext(), "" + (seekBar.getProgress() + 1), Toast.LENGTH_LONG).show();
                     imageBitmap = kMeans.getResult();*/
-                    photo.setImageBitmap(imageBitmap);
+                    photo.setImageBitmap(imageForC);
                     Toast.makeText(getApplicationContext(), "Successful segmentation", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getApplicationContext(), "Please choose the image", Toast.LENGTH_LONG).show();
@@ -179,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public native Bitmap buildSegmented(Bitmap bitmap);
+    public native Bitmap buildSegmented(Bitmap bitmap, int clusterCount);
    /* public native String startNDI();
     static{
         System.loadLibrary("startNDI");

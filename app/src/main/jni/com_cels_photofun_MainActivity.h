@@ -18,7 +18,7 @@ extern "C" {
  * Signature: (Landroid/graphics/Bitmap;)Landroid/graphics/Bitmap;
  */
 JNIEXPORT jobject JNICALL Java_com_cels_photofun_MainActivity_buildSegmented
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jobject, jint);
 
 #ifdef __cplusplus
 }
