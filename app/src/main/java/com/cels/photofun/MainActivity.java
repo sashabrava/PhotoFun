@@ -1,56 +1,41 @@
 package com.cels.photofun;
 
-import android.content.ContentValues;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TEMP_FOLDER = "photos";
-    private static final String TEMP_FILE = "temp.jpg";
-    private static final int PICK_IMAGE = 2;
+    private static final String TEMP_FILE = "temp.mp4";
+    private static final int REQUEST_IMAGE_GALLERY = 0;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int ROTATE_DEGREE = 90;
-    private static final int JPEG_QUALITY = 100;
+    private static final int REQUEST_VIDEO_CAPTURE = 2;
+
+    private static final int FRAGMENT_PHOTO = 0;
+    private static final int FRAGMENT_VIDEO = 1;
+
     static {
         System.loadLibrary("buildSegmented");
     }
 
-    private Bitmap imageForC;
-    private Bitmap imageBitmap;
+    int fragmentType = FRAGMENT_VIDEO;
+    InterfaceFragment frag;
     private SeekBar seekBar;
-    private boolean newImage = true;
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        setContentView(R.layout.activity_main);
-        start();
-        if (imageForC != null) {
-            ImageView photoImg = (ImageView) findViewById(R.id.imageView);
-            photoImg.setImageBitmap(imageForC);
-        }
-    }
+    public static native Bitmap buildSegmented(Bitmap bitmap, int clusterCount);
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -65,42 +50,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void start() {
+        seekBar = (SeekBar) findViewById(R.id.seekBar2);
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(android.R.drawable.ic_lock_power_off);
         }
-        seekBar = (SeekBar) findViewById(R.id.seekBar2);
-        ImageView photoImg = (ImageView) findViewById(R.id.imageView);
-        photoImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imageRotate();
-            }
-        });
-        getWindow().setFormat(PixelFormat.RGBA_8888);
-        if (imageBitmap != null) {
-            photoImg.setImageBitmap(imageBitmap);
-        }
         Button photo = (Button) findViewById(R.id.buttonTakePic);
         photo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dispatchTakePictureIntent();
-                newImage = true;
+                switch (fragmentType) {
+                    case FRAGMENT_PHOTO:
+                        dispatchTakePictureIntent();
+                        break;
+                    case FRAGMENT_VIDEO:
+                        dispatchTakeVideoIntent();
+                        break;
+                }
+
             }
         });
         Button segmentation = (Button) findViewById(R.id.buttonSetSegmentation);
         segmentation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (imageBitmap != null) {
+                frag.segment(seekBar.getProgress());
+               /* if (imageBitmap != null) {
                     imageForC = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth(), imageBitmap.getHeight(), false);
                     MyTask myTask = new MyTask(imageForC);
                     myTask.execute();
                 } else {
                     Toast.makeText(getApplicationContext(), "Please choose the image", Toast.LENGTH_LONG).show();
-                }
+                }*/
 
             }
         });
@@ -112,15 +94,16 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
-                newImage = true;
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_IMAGE_GALLERY);
+                // newImage = true;
             }
         });
         Button save = (Button) findViewById(R.id.buttonSave);
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveImageFile();
+                //saveImageFile();
+                frag.save();
             }
         });
     }
@@ -129,6 +112,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_main);
         super.onCreate(savedInstanceState);
+        File f = new File(getApplicationContext().getExternalFilesDir(TEMP_FOLDER), TEMP_FILE);
+        Bundle args = new Bundle();
+        args.putString("path", f.getPath());
+        frag = new VideoFragment();
+        //frag = new PhotoFragment();
+        frag.setArguments(args);
+        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+        trans.add(R.id.frameLayout, frag);
+        trans.commit();
         start();
     }
 
@@ -139,39 +131,14 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            File f = new File(getApplicationContext().getExternalFilesDir(TEMP_FOLDER), TEMP_FILE);
-            ImageView photoImg = (ImageView) findViewById(R.id.imageView);
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            try {
-                imageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
-                if (photoImg.getWidth() > 0 && photoImg.getHeight() > 0) {
-                    addImage();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Please try again. Error has occured", Toast.LENGTH_LONG).show();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-
-        } else if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
-            try {
-                InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(data.getData());
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                imageBitmap = BitmapFactory.decodeStream(inputStream);
-                addImage();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
+    private void dispatchTakeVideoIntent() {
+        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        File f = new File(getApplicationContext().getExternalFilesDir(TEMP_FOLDER), TEMP_FILE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+        startActivityForResult(intent, REQUEST_VIDEO_CAPTURE);
     }
 
-    private void saveImageFile() {
+   /* private void saveImageFile() {
         if (imageForC != null) {
             String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault()).format(System.currentTimeMillis());
             File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/PhotoFun/");
@@ -204,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(getApplicationContext(), "There is no segmented image", Toast.LENGTH_LONG).show();
         }
-    }
+    }*/
 
-    private void addImage() {
+  /*  private void addImage() {
         if (imageBitmap == null) return;
         ImageView photoImg = (ImageView) findViewById(R.id.imageView);
         int coefWidth = imageBitmap.getWidth() / photoImg.getWidth();
@@ -215,29 +182,66 @@ public class MainActivity extends AppCompatActivity {
         imageBitmap = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth() / coefScale, imageBitmap.getHeight() / coefScale, false);
         photoImg.setImageBitmap(imageBitmap);
 
-    }
+    }*/
 
-    private void imageRotate() {
-        if (imageBitmap == null) return;
-        else if (imageForC != null && !newImage) {
-            Matrix matrix = new Matrix();
-            matrix.postRotate(ROTATE_DEGREE);
-            imageForC = Bitmap.createBitmap(imageForC, 0, 0, imageForC.getWidth(), imageForC.getHeight(), matrix, true);
-            ImageView photoImg = (ImageView) findViewById(R.id.imageView);
-            photoImg.setImageBitmap(imageForC);
-        } else {
-            Matrix matrix = new Matrix();
-            matrix.postRotate(ROTATE_DEGREE);
-            imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), matrix, true);
-            ImageView photoImg = (ImageView) findViewById(R.id.imageView);
-            photoImg.setImageBitmap(imageBitmap);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) switch (requestCode) {
+            case REQUEST_IMAGE_CAPTURE:
+                File f = new File(getApplicationContext().getExternalFilesDir(TEMP_FOLDER), TEMP_FILE);
+                String path = f.getPath();
+                frag.setContent(path);
+
+                break;
+            case REQUEST_IMAGE_GALLERY:
+                try {
+                    InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(data.getData());
+                    frag.setContent(inputStream);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+
+            case REQUEST_VIDEO_CAPTURE:
+                File f1 = new File(getApplicationContext().getExternalFilesDir(TEMP_FOLDER), TEMP_FILE);
+                String path1 = f1.getPath();
+                frag.setContent(path1);
+                break;
+            ///ImageView photoImg = (ImageView) findViewById(R.id.imageView);
+                 /*BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                try {
+                   Bitmap imageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
+                    PhotoFragment fragment = new PhotoFragment();
+                   if (photoImg.getWidth() > 0 && photoImg.getHeight() > 0) {
+                        addImage();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Please try again. Error has occured", Toast.LENGTH_LONG).show();
+                    }
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }*/
+
 
         }
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+
+
+        } /*else if (requestCode == REQUEST_IMAGE_GALLERY && resultCode == RESULT_OK) {
+            try {
+                InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(data.getData());
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                imageBitmap = BitmapFactory.decodeStream(inputStream);
+                addImage();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }*/
     }
 
-    public native Bitmap buildSegmented(Bitmap bitmap, int clusterCount);
-
-    class MyTask extends AsyncTask<Void, Void, Void> {
+    static class MyTask extends AsyncTask<Integer, Void, Void> {
 
         private final Bitmap imageForC;
 
@@ -248,25 +252,26 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Button segment = (Button) findViewById(R.id.buttonSetSegmentation);
-            segment.setText(getApplicationContext().getString(R.string.segment_process));
+            //Button segment = (Button) findViewById(R.id.buttonSetSegmentation);
+            // segment.setText(getApplicationContext().getString(R.string.segment_process));
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            buildSegmented(imageForC, seekBar.getProgress() + 1);
+        protected Void doInBackground(Integer... params) {
+            int amountClusters = params[0] + 1;
+            buildSegmented(imageForC, amountClusters);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            ImageView photo = (ImageView) findViewById(R.id.imageView);
+           /* ImageView photo = (ImageView) findViewById(R.id.imageView);
             photo.setImageBitmap(imageForC);
             Toast.makeText(getApplicationContext(), "Successful segmentation", Toast.LENGTH_LONG).show();
             Button segment = (Button) findViewById(R.id.buttonSetSegmentation);
-            segment.setText(getApplicationContext().getString(R.string.segment));
-            newImage = false;
+            segment.setText(getApplicationContext().getString(R.string.segment));*/
+            //newImage = false;
         }
     }
 }

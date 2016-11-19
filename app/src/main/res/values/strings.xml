@@ -5,4 +5,10 @@
     <string name="take_pic">Take pic</string>
     <string name="load_pic">Load pic</string>
     <string name="save">Save</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="video_fragment">Video fragment</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
