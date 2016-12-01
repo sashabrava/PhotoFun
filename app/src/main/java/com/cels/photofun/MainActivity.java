@@ -18,7 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TEMP_FOLDER = "photos";
+    public static final String TEMP_FOLDER = "photos";
     private static final String TEMP_FILE = "temp.mp4";
     private static final int REQUEST_IMAGE_GALLERY = 0;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -50,6 +50,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void start() {
+        Button changeFragment = (Button) findViewById(R.id.buttonChangeType);
+        changeFragment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (fragmentType == FRAGMENT_VIDEO) {
+                    File f = new File(getApplicationContext().getExternalFilesDir(TEMP_FOLDER), TEMP_FILE);
+                    Bundle args = new Bundle();
+                    args.putString("path", f.getPath());
+                    fragmentType = FRAGMENT_PHOTO;
+                    frag = new PhotoFragment();
+                    frag.setArguments(args);
+                    findViewById(R.id.buttonSetSegmentation).setEnabled(true);
+                    findViewById(R.id.buttonSave).setEnabled(true);
+                    findViewById(R.id.buttonLoad).setEnabled(true);
+                    ((Button) v).setText("Video");
+                    setFragment();
+                } else {
+                    File f = new File(getApplicationContext().getExternalFilesDir(TEMP_FOLDER), TEMP_FILE);
+                    Bundle args = new Bundle();
+                    args.putString("path", f.getPath());
+                    fragmentType = FRAGMENT_VIDEO;
+                    frag = new VideoFragment();
+                    frag.setArguments(args);
+                    findViewById(R.id.buttonSave).setEnabled(false);
+                    //findViewById(R.id.buttonLoad).setEnabled(false);
+                    ((Button) v).setText("Photo");
+                    setFragment();
+                }
+
+            }
+        });
         seekBar = (SeekBar) findViewById(R.id.seekBar2);
         android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -75,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         segmentation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                frag.segment(seekBar.getProgress());
+                frag.segment(seekBar.getProgress(), (Button) findViewById(R.id.buttonSetSegmentation));
                /* if (imageBitmap != null) {
                     imageForC = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth(), imageBitmap.getHeight(), false);
                     MyTask myTask = new MyTask(imageForC);
@@ -92,9 +123,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
-                intent.setType("image/*");
+                switch (fragmentType) {
+                    case FRAGMENT_PHOTO:
+                        intent.setType("image/*");
+                        break;
+                    case FRAGMENT_VIDEO:
+                        intent.setType("video/*");
+                        break;
+                }
+                //intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_IMAGE_GALLERY);
+                startActivityForResult(Intent.createChooser(intent, "Select"), REQUEST_IMAGE_GALLERY);
                 // newImage = true;
             }
         });
@@ -108,6 +147,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public void setFragment() {
+        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+        trans.add(R.id.frameLayout, frag);
+        trans.commit();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_main);
@@ -116,11 +160,11 @@ public class MainActivity extends AppCompatActivity {
         Bundle args = new Bundle();
         args.putString("path", f.getPath());
         frag = new VideoFragment();
+        findViewById(R.id.buttonSave).setEnabled(false);
+        //findViewById(R.id.buttonLoad).setEnabled(false);
         //frag = new PhotoFragment();
         frag.setArguments(args);
-        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-        trans.add(R.id.frameLayout, frag);
-        trans.commit();
+        setFragment();
         start();
     }
 
@@ -195,12 +239,12 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case REQUEST_IMAGE_GALLERY:
                 try {
+
                     InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(data.getData());
                     frag.setContent(inputStream);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-
                 break;
 
             case REQUEST_VIDEO_CAPTURE:

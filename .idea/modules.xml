@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/JCodecNew/JCodecNew.iml" filepath="$PROJECT_DIR$/JCodecNew/JCodecNew.iml" />
       <module fileurl="file://$PROJECT_DIR$/PhotoFun.iml" filepath="$PROJECT_DIR$/PhotoFun.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

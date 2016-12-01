@@ -123,12 +123,12 @@ int findMinimalCluster(Cluster clusters[], int amountClusters, int rgb) {
        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
        return NULL;
        }
-   uint32_t* src = (uint32_t*) bitmapPixels;
+   uint32_t* tempPixels = (uint32_t*) bitmapPixels;
 
-    uint32_t* tempPixels = (uint32_t*) malloc(sizeof(uint32_t)*info.height * info.width);
+    ///uint32_t* tempPixels = (uint32_t*) malloc(sizeof(uint32_t)*info.height * info.width);
     int pixelsCount = info.height * info.width;
-    memcpy(tempPixels, src, sizeof(uint32_t) * pixelsCount);
-    AndroidBitmap_unlockPixels(env, bitmap);
+    //memcpy(tempPixels, src, sizeof(uint32_t) * pixelsCount);
+   // AndroidBitmap_unlockPixels(env, bitmap);
         int currentX = 0;
         int currentY = 0;
         int differenceX = (int)(1*info.width / amountClusters);
@@ -168,22 +168,25 @@ int findMinimalCluster(Cluster clusters[], int amountClusters, int rgb) {
 
                 }
 LOGD("editing old bitmap...");
-   if ((ret = AndroidBitmap_lockPixels(env, bitmap, &bitmapPixels)) < 0)
+  /* if ((ret = AndroidBitmap_lockPixels(env, bitmap, &bitmapPixels)) < 0)
        {
        LOGE("AndroidBitmap_lockPixels() failed while writing to file ! error=%d", ret);
        return NULL;
-       }
+       }*/
 
     for (int x = 0; x < info.width; x++)
       for (int y = 0; y < info.height; y++)
         {
         uint32_t pixel = tempPixels[info.width * y + x];
-        src[info.width * y + x] = getRGB(&clusters[idArray[info.width * y + x]]);
+        tempPixels[info.width * y + x] = getRGB(&clusters[idArray[info.width * y + x]]);
         }
          AndroidBitmap_unlockPixels(env, bitmap);
 
 free(idArray);
 free(clusters);
-free(tempPixels);
+//free(tempPixels);
+//free(src);
+
+//free(bitmapPixels);
 return NULL;
    }

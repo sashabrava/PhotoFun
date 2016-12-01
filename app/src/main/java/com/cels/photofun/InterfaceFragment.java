@@ -1,6 +1,7 @@
 package com.cels.photofun;
 
 import android.support.v4.app.Fragment;
+import android.widget.Button;
 
 import java.io.InputStream;
 
@@ -14,6 +15,6 @@ public abstract class InterfaceFragment extends Fragment {
 
     public abstract void save();
 
-    public abstract void segment(int amountClusters);
+    public abstract void segment(int amountClusters, Button button);
 
 }
