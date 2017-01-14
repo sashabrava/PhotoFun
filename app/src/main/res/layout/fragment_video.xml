@@ -3,16 +3,15 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              tools:context="com.cels.photofun.VideoFragment">
-
-    <!-- TODO: Update blank fragment layout -->
     <VideoView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" android:id="@+id/videoView"/>
+        android:id="@+id/videoView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
     <SeekBar
+        android:id="@+id/seekBarProgress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/seekBarProgress"
             android:max="100"
-            android:progress="0"/>
-
+        android:progress="0" />
 </FrameLayout>

@@ -18,7 +18,7 @@ import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
     static final String TEMP_FOLDER = "photos";
-    private static final String TEMP_FILE = "temp.mp4";
+    private static final String TEMP_FILE = "temp.phf";
     private static final int REQUEST_IMAGE_GALLERY = 0;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_VIDEO_CAPTURE = 2;
@@ -82,9 +82,6 @@ public class MainActivity extends AppCompatActivity {
                 intent.setType("video/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Select"), REQUEST_IMAGE_GALLERY);
-                break;
-            case R.id.buttonSaveVideo:
-                frag.save();
                 break;
             case R.id.buttonSegmentVideo:
                 frag.segment(seekBar.getProgress(), (Button) view);

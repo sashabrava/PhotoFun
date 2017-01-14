@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 //Copyright http://jcodec.org/lic.html
-public class SequenceEncoder {
+class SequenceEncoder {
     private SeekableByteChannel ch;
     private Picture toEncode;
     private Transform transform;
@@ -35,22 +35,22 @@ public class SequenceEncoder {
     private int frameNo;
     private MP4Muxer muxer;
 
-    public SequenceEncoder(File out) throws IOException {
+    SequenceEncoder(File out) throws IOException {
         this.ch = NIOUtils.writableFileChannel(out);
         this.muxer = new MP4Muxer(this.ch, Brand.MP4);
         this.outTrack = this.muxer.addTrack(TrackType.VIDEO, 10);
         this._out = ByteBuffer.allocate(2441600);
         this.encoder = new H264Encoder();
         this.transform = ColorUtil.getTransform(ColorSpace.RGB, this.encoder.getSupportedColorSpaces()[0]);
-        this.spsList = new ArrayList();
-        this.ppsList = new ArrayList();
+        this.spsList = new ArrayList<>();
+        this.ppsList = new ArrayList<>();
     }
 
-    public void encodeImage(Bitmap bi) throws IOException {
+    void encodeImage(Bitmap bi) throws IOException {
         this.encodeNativeFrame(BitmapUtil.fromBitmap(bi));
     }
 
-    public void encodeNativeFrame(Picture pic) throws IOException {
+    private void encodeNativeFrame(Picture pic) throws IOException {
         if (this.toEncode == null) {
             this.toEncode = Picture.create(pic.getWidth(), pic.getHeight(), this.encoder.getSupportedColorSpaces()[0]);
         }
@@ -66,7 +66,7 @@ public class SequenceEncoder {
         ++this.frameNo;
     }
 
-    public void finish() throws IOException {
+    void finish() throws IOException {
         this.outTrack.addSampleEntry(H264Utils.createMOVSampleEntry(this.spsList, this.ppsList, 4));
         this.muxer.writeHeader();
         NIOUtils.closeQuietly(this.ch);
