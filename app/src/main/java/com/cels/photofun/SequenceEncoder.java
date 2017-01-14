@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+//Copyright http://jcodec.org/lic.html
 public class SequenceEncoder {
     private SeekableByteChannel ch;
     private Picture toEncode;

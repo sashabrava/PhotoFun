@@ -204,8 +204,6 @@ public class VideoFragment extends InterfaceFragment {
                     buildSegmented(bitmap, clusters);
                     finalEnc.encodeImage(bitmap);
                     publishProgress((int) (100 * second / maxSecond));
-                    // Toast.makeText(getContext(), "Ready " + (int)(100*second/maxSecond) + " %", Toast.LENGTH_SHORT).show();
-
                 } catch (IOException | JCodecException e) {
                     e.printStackTrace();
                     Log.w("VIDEO", "Maybe it' the end");
@@ -213,10 +211,6 @@ public class VideoFragment extends InterfaceFragment {
                 }
             }
             try {
-                //Audio audio =
-                // Soun
-                // finalEnc.
-                //PCMMP4MuxerTrack track
                 finalEnc.finish();
             } catch (IOException e) {
                 e.printStackTrace();

@@ -15,43 +15,91 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-        <TableRow
+        <com.cels.photofun.TableRowExtended
+                android:id="@+id/panelTopPhoto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
             <Button
                     android:text="Photo"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/buttonChangeType"/>
+                    android:layout_height="wrap_content" android:id="@+id/buttonChangePhotoFragment"
+                    android:onClick="onClickPhoto"/>
             <Button
                     android:text="@string/take_pic"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:id="@+id/buttonTakePic"/>
+                    android:id="@+id/buttonTakePic"
+                    android:onClick="onClickPhoto"/>
             <Button
                     android:text="@string/segment"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="1" android:id="@+id/buttonSetSegmentation"
-
+                    android:layout_weight="1" android:id="@+id/buttonSegmentPhoto"
+                    android:onClick="onClickPhoto"
             />
             <Button
                     android:text="@string/load_pic"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="1" android:id="@+id/buttonLoad"
+                    android:layout_weight="1" android:id="@+id/buttonLoadPic"
+                    android:onClick="onClickPhoto"
             />
             <Button
                     android:text="@string/save"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:id="@+id/buttonSave"/>
-        </TableRow>
+                    android:id="@+id/buttonSavePhoto"
+                    android:onClick="onClickPhoto"/>
+        </com.cels.photofun.TableRowExtended>
+        <com.cels.photofun.TableRowExtended
+                android:id="@+id/panelTopVideo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <Button
+                    android:text="Video"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/buttonChangeVideoFragment"
+                    android:onClick="onClickVideo"/>
+            <Button
+                    android:text="Take video"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:id="@+id/buttonTakeVideo"
+                    android:onClick="onClickVideo"/>
+            <Button
+                    android:text="@string/segment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" android:id="@+id/buttonSegmentVideo"
+                    android:onClick="onClickVideo"
+            />
+            <Button
+                    android:text="@string/load_pic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" android:id="@+id/buttonLoadVideo"
+                    android:onClick="onClickVideo"
+            />
+            <Button
+                    android:text="@string/save"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:id="@+id/buttonSaveVideo"
+                    android:onClick="onClickVideo"/>
+        </com.cels.photofun.TableRowExtended>
         <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+            <TextView
+                    android:text="Amount of clusters: "
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/textView"/>
             <SeekBar
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
