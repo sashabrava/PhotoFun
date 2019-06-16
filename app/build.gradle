@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
-    buildToolsVersion "24.0.2"
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "com.cels.photofun"
         minSdkVersion 15
@@ -28,12 +28,12 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.android.support:support-v4'
-    compile 'org.jcodec:jcodec-android:0.1.9'
-    testCompile 'junit:junit:4.12'
+    implementation  'com.android.support:appcompat-v7:25.4.0'
+    implementation  'com.android.support:support-v4'
+    implementation  'org.jcodec:jcodec-android:0.1.9'
+    testImplementation  'junit:junit:4.12'
 }
