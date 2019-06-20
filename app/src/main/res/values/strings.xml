@@ -16,5 +16,6 @@
     <string name="take_video">Take video</string>
     <string name="segment_and_save">Segment and save</string>
     <string name="amount_of_clusters">Amount of clusters:</string>
+    <string name="progress">Progress:</string>
     <string name="load_video">Load video</string>
 </resources>

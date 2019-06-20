@@ -18,14 +18,15 @@ import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
     static final String TEMP_FOLDER = "photos";
-    private static final String TEMP_FILE = "temp.phf";
+    private static final String TEMP_FILE = "temp.temp";
     private static final int REQUEST_IMAGE_GALLERY = 0;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_VIDEO_CAPTURE = 2;
 
+    //Available Fragment types
     private static final int FRAGMENT_PHOTO = 0;
     private static final int FRAGMENT_VIDEO = 1;
-
+    // NDK module for processing image
     static {
         System.loadLibrary("buildSegmented");
     }
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
+    //Onclick event for panelTopPhoto buttons
     public void onClickPhoto(View view) {
         switch (view.getId()) {
             case R.id.buttonChangePhotoFragment:
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
-
+    //Onclick event for panelTopVideo buttons
     public void onClickVideo(View view) {
         switch (view.getId()) {
             case R.id.buttonChangeVideoFragment:
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
-
+    //Function to change Fragment on Main Activity
     private void setFragment(int fragmentType) {
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
         switch (fragmentType) {
