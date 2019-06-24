@@ -27,11 +27,14 @@ class BitmapExtended {
     }
 
     void imageRotate() {
-        Bitmap picture = ((BitmapDrawable) photoImg.getDrawable()).getBitmap();
-        Matrix matrix = new Matrix();
-        matrix.postRotate(ROTATE_DEGREE);
-        picture = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), matrix, true);
-        photoImg.setImageBitmap(picture);
+        BitmapDrawable photoImgDrawable = ((BitmapDrawable) photoImg.getDrawable());
+        if (photoImgDrawable != null){
+            Bitmap picture = photoImgDrawable.getBitmap();
+            Matrix matrix = new Matrix();
+            matrix.postRotate(ROTATE_DEGREE);
+            picture = Bitmap.createBitmap(picture, 0, 0, picture.getWidth(), picture.getHeight(), matrix, true);
+            photoImg.setImageBitmap(picture);
+        }
     }
 
     boolean segment(int amountClusters, TableRowExtended panelTop) {
